@@ -12,6 +12,7 @@ import {
   Game,
   Message,
   Player,
+  RegistrationPayload,
   Room,
   RoomPayload,
   Ship,
@@ -100,11 +101,13 @@ function handlePlayerDisconnect(ws: WebSocket) {
           sendWinnersUpdate();
         }
 
+        const data = JSON.stringify({
+          winPlayer: winner,
+        });
+
         sendToPlayersInGame(gameId, {
           type: "finish",
-          data: {
-            winPlayer: winner,
-          },
+          data,
           id: 0,
         });
       }
@@ -113,7 +116,8 @@ function handlePlayerDisconnect(ws: WebSocket) {
 }
 
 function handleMessage(ws: WebSocket, message: Message): void {
-  const { type, data, id } = message;
+  const { type, data: rawData, id } = message;
+  const data = rawData && JSON.parse(rawData);
 
   switch (type) {
     case "reg":
@@ -139,7 +143,7 @@ function handleMessage(ws: WebSocket, message: Message): void {
   }
 }
 
-function handleRegistration(ws: WebSocket, data: any): void {
+function handleRegistration(ws: WebSocket, data: RegistrationPayload): void {
   const { name, password } = data;
   let playerIndex: number | string;
   let error = false;
@@ -290,26 +294,29 @@ function handleAddUserToRoom(ws: WebSocket, data: RoomPayload): void {
     const player2Connection = playerConnections.get(player2Index);
 
     if (player1Connection) {
+      const data = JSON.stringify({
+        idGame: gameId,
+        idPlayer: player1Index,
+      });
       player1Connection.send(
         JSON.stringify({
           type: "create_game",
-          data: {
-            idGame: gameId,
-            idPlayer: player1Index,
-          },
+          data,
           id: 0,
         })
       );
     }
 
     if (player2Connection) {
+      const data = JSON.stringify({
+        idGame: gameId,
+        idPlayer: player2Index,
+      });
+
       player2Connection.send(
         JSON.stringify({
           type: "create_game",
-          data: {
-            idGame: gameId,
-            idPlayer: player2Index,
-          },
+          data,
           id: 0,
         })
       );
@@ -360,13 +367,15 @@ function handleAddShips(ws: WebSocket, data: ShipPayload): void {
 
     const player1Connection = playerConnections.get(game.players.player1.index);
     if (player1Connection) {
+      const data = JSON.stringify({
+        ships: game.players.player1.ships,
+        currentPlayerIndex: game.players.player1.index,
+      });
+
       player1Connection.send(
         JSON.stringify({
           type: "start_game",
-          data: {
-            ships: game.players.player1.ships,
-            currentPlayerIndex: game.players.player1.index,
-          },
+          data,
           id: 0,
         })
       );
@@ -374,23 +383,27 @@ function handleAddShips(ws: WebSocket, data: ShipPayload): void {
 
     const player2Connection = playerConnections.get(game.players.player2.index);
     if (player2Connection) {
+      const data = JSON.stringify({
+        ships: game.players.player2.ships,
+        currentPlayerIndex: game.players.player2.index,
+      });
+
       player2Connection.send(
         JSON.stringify({
           type: "start_game",
-          data: {
-            ships: game.players.player2.ships,
-            currentPlayerIndex: game.players.player2.index,
-          },
+          data,
           id: 0,
         })
       );
     }
 
+    const turnData = JSON.stringify({
+      currentPlayer: game.currentTurn,
+    });
+
     sendToPlayersInGame(gameId, {
       type: "turn",
-      data: {
-        currentPlayer: game.currentTurn,
-      },
+      data: turnData,
       id: 0,
     });
   }
@@ -400,6 +413,7 @@ function handleAttack(ws: WebSocket, data: AttackPayload): void {
   const { gameId, x, y, indexPlayer } = data;
 
   const game = games.get(gameId);
+  console.log({ gameId, x, y, indexPlayer, game });
   if (!game) {
     console.error("Game not found");
     return;
@@ -448,13 +462,15 @@ function handleAttack(ws: WebSocket, data: AttackPayload): void {
       const missedCells = markCellsAroundShip(hitShip, targetBoard);
 
       for (const cell of missedCells) {
+        const data = JSON.stringify({
+          position: cell,
+          currentPlayer: indexPlayer,
+          status: "miss",
+        });
+
         sendToPlayersInGame(gameId, {
           type: "attack",
-          data: {
-            position: cell,
-            currentPlayer: indexPlayer,
-            status: "miss",
-          },
+          data,
           id: 0,
         });
       }
@@ -469,11 +485,13 @@ function handleAttack(ws: WebSocket, data: AttackPayload): void {
           sendWinnersUpdate();
         }
 
+        const data = JSON.stringify({
+          winPlayer: indexPlayer,
+        });
+
         sendToPlayersInGame(gameId, {
           type: "finish",
-          data: {
-            winPlayer: indexPlayer,
-          },
+          data,
           id: 0,
         });
       }
@@ -484,22 +502,26 @@ function handleAttack(ws: WebSocket, data: AttackPayload): void {
     game.currentTurn = targetPlayer;
   }
 
+  const attackData = JSON.stringify({
+    position: { x, y },
+    currentPlayer: indexPlayer,
+    status,
+  });
+
   sendToPlayersInGame(gameId, {
     type: "attack",
-    data: {
-      position: { x, y },
-      currentPlayer: indexPlayer,
-      status,
-    },
+    data: attackData,
     id: 0,
   });
 
   if (!game.finished && status === "miss") {
+    const data = JSON.stringify({
+      currentPlayer: game.currentTurn,
+    });
+
     sendToPlayersInGame(gameId, {
       type: "turn",
-      data: {
-        currentPlayer: game.currentTurn,
-      },
+      data,
       id: 0,
     });
   }
