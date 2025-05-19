@@ -1,6 +1,6 @@
 import { spawn } from "child_process";
 
-console.log("Starting development environment...");
+console.log("Starting server environment...");
 
 const server = spawn("npm", ["run", "server"], {
   stdio: "inherit",
@@ -13,7 +13,7 @@ const client = spawn("npm", ["run", "client"], {
 });
 
 const cleanup = () => {
-  console.log("Shutting down development environment...");
+  console.log("Shutting down server environment...");
   server.kill();
   client.kill();
   process.exit();
