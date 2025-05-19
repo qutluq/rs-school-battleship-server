@@ -4,6 +4,7 @@
   "ts-node": {
     "transpileOnly": true,
     "files": true,
+    "esm": true,
     "compilerOptions": {
     }
   },
@@ -11,14 +12,14 @@
   "compilerOptions": {
     "target": "ESNext",
     "lib": ["esnext", "DOM"],
-    "module": "CommonJS",
+    "module": "ESNext",
     "rootDir": "./",
     "moduleResolution": "node",
     "baseUrl": "./",
-    "allowImportingTsExtensions": true,
+    "allowImportingTsExtensions": false,
     "resolveJsonModule": true,
     "sourceMap": true,
-    "noEmit": true,
+    "noEmit": false,
     "outDir": "./dist",
     "noEmitOnError": true,
     "preserveConstEnums": true,
@@ -29,8 +30,8 @@
     "noImplicitAny": true,
     "strictNullChecks": true,
     "strictPropertyInitialization": true,
-    "skipLibCheck": true
+    "skipLibCheck": true    
   },
-  "include": ["**/*.ts", "**/*.spec.ts"],
-  "exclude": ["node_modules", "dist/**"]
+  "include": ["types/*", "./gameLogic.ts", "./server.ts"],
+  "exclude": ["node_modules", "**/*.test.ts", "dist"]
 }
