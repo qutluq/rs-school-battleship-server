@@ -4,6 +4,11 @@ export type RoomPayload = {
   indexRoom: number;
 };
 
+export type RegistrationPayload = {
+  name: string;
+  password: string;
+};
+
 export type ShipPayload = {
   gameId: string;
   ships: Ship[];

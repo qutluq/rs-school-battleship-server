@@ -17,7 +17,7 @@ export type Ship = {
     x: number;
     y: number;
   };
-  direction: Direction;
+  direction: Direction | boolean;
   length: number;
   type: "small" | "medium" | "large" | "huge";
 };

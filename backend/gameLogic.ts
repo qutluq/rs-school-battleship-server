@@ -1,4 +1,5 @@
-import { BOARD_SIZE, Game, Ship } from "./types/index.js";
+import { BOARD_SIZE, Direction, Game, Ship } from "./types/index.js";
+import { getDirection } from "./utils/index.js";
 
 export function createGameBoard(): (null | "ship" | "hit" | "miss")[][] {
   const board = [];
@@ -14,7 +15,8 @@ export function isValidShipPlacement(
   board: (null | "ship" | "hit" | "miss")[][]
 ): boolean {
   const { x, y } = ship.position;
-  const { direction, length } = ship;
+  const { length } = ship;
+  const direction = getDirection(ship.direction as boolean);
 
   if (x < 0 || x >= BOARD_SIZE || y < 0 || y >= BOARD_SIZE) {
     return false;
@@ -77,7 +79,8 @@ export function placeShips(
 
   for (const ship of ships) {
     const { x, y } = ship.position;
-    const { direction, length } = ship;
+    const { length } = ship;
+    const direction = getDirection(ship.direction as boolean);
 
     if (!isValidShipPlacement(ships, ship, tempBoard)) {
       return false;
@@ -108,7 +111,8 @@ export function isShipDestroyed(
   board: (null | "ship" | "hit" | "miss")[][]
 ): boolean {
   const { x, y } = ship.position;
-  const { direction, length } = ship;
+  const { length } = ship;
+  const direction = getDirection(ship.direction as boolean);
 
   if (direction === "horizontal") {
     for (let i = 0; i < length; i++) {
@@ -132,7 +136,8 @@ export function markCellsAroundShip(
   board: (null | "ship" | "hit" | "miss")[][]
 ): { x: number; y: number }[] {
   const { x, y } = ship.position;
-  const { direction, length } = ship;
+  const { length } = ship;
+  const direction = getDirection(ship.direction as boolean);
   const missedCells: { x: number; y: number }[] = [];
 
   if (direction === "horizontal") {
