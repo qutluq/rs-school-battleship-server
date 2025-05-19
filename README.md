@@ -40,11 +40,6 @@ This project implements a backend server for a Battleship game using WebSockets.
    ```
 
 ## Usage
-**Development**
-
-`npm run start:dev`
-
-* App served @ `http://localhost:8181` with nodemon
 
 **Production**
 
